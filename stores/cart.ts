@@ -12,7 +12,7 @@ export type CartItem = {
   quantity: number;
 };
 
-type CartState = {
+export type CartState = {
   items: CartItem[];
   isOpen: boolean;
   addItem: (product: Product, shade: Shade, quantity?: number) => void;

@@ -3,10 +3,12 @@ import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Header } from "@/components/Layout/Header";
+// import { Header } from "@/components/Layout/Header";
 import { Footer } from "@/components/Layout/Footer";
 import { WhatsAppFloat } from "@/components/Layout/WhatsAppFloat";
 import { MobileCartBar } from "@/components/Layout/MobileCartBar";
+import { AuthProvider } from "@/context/AuthContext";
+import { GlobalHeader } from "@/components/Layout/GlobalHeader";
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
@@ -37,13 +39,15 @@ export default function RootLayout({
     >
         <body className="min-h-full flex flex-col">
           <TooltipProvider>
-          <div className="flex min-h-screen flex-col bg-soft-pink">
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
-            <WhatsAppFloat />
-            <MobileCartBar />
-          </div>
+            <AuthProvider user={null}>              
+              <div className="flex min-h-screen flex-col bg-soft-pink">
+                <GlobalHeader />
+                <main className="flex-1">{children}</main>
+                <Footer />
+                <WhatsAppFloat />
+                <MobileCartBar />
+              </div>
+          </AuthProvider>
         </TooltipProvider>
       </body>
     </html>

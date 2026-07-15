@@ -1,5 +1,5 @@
 import { ProductCard } from "@/components/product/ProductCard";
-import { products } from "@/data/products";
+import { fetchProducts } from "@/lib/api";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -12,7 +12,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ShopPage() {
+export default async function ShopPage() {
+  const products = await fetchProducts();
+  
   return (
     <>
       <section className="bg-soft-pink pt-14 pb-10 sm:pt-20 sm:pb-16">

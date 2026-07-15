@@ -1,4 +1,4 @@
-import type { Shade } from "@/data/products";
+import type { DbShade } from "@/lib/db/schema";
 
 export function ShadeSelector({
   shades,
@@ -6,9 +6,9 @@ export function ShadeSelector({
   onSelect,
   size = "md",
 }: {
-  shades: Shade[];
-  selected: Shade;
-  onSelect: (s: Shade) => void;
+  shades: DbShade[];
+  selected: DbShade;
+  onSelect: (s: DbShade) => void;
   size?: "sm" | "md" | "lg";
 }) {
   const sz = size === "sm" ? "size-4" : size === "lg" ? "size-7" : "size-5";

@@ -1,4 +1,4 @@
-import { getProduct, getRelated } from "@/data/products";;
+import { fetchProductBySlug, fetchRelatedProducts } from "@/lib/api";
 import { Metadata } from "next";
 import ProductPageClientArea from "@/components/product/ProductPageClientArea";
 
@@ -8,9 +8,11 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const slug = (await params).slug;
-  const product = await getProduct(slug);
+  const product = await fetchProductBySlug(slug);
 
   if (!product) return {};
+
+  const mainImage = product.images?.[0]?.storageKey || "";
 
   return {
     title: `${product.name} — Glow & Go`,
@@ -20,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: product.description,
       images: [
         {
-          url: product.image as string,
+          url: mainImage,
         },
       ],
       type: "music.song", // Next.js types explicitly map standard 'product' to literal extensions or basic types. For retail products, standard OG tags fall back cleanly.
@@ -30,17 +32,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProductPage({ params }: Props) {
   const slug = (await params).slug;
-  const product = await getProduct(slug);
+  const product = await fetchProductBySlug(slug);
   if (!product) {
-      return (
-        <>
-          <div className="mx-auto max-w-7xl px-5 py-6 sm:px-8">
-            <p className="text-center text-zinc-500">Product not found.</p>
-          </div>
-        </>
-      );
-    }
-  const related = getRelated(product.slug, 4);
+    return (
+      <>
+        <div className="mx-auto max-w-7xl px-5 py-6 sm:px-8">
+          <p className="text-center text-zinc-500">Product not found.</p>
+        </div>
+      </>
+    );
+  }
+  const related = await fetchRelatedProducts(product.slug, 4);
 
   return <ProductPageClientArea product={product} related={related} />;
 }

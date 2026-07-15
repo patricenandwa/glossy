@@ -8,18 +8,31 @@ import { Rating } from "@/components/product/Rating";
 import { ShadeSelector } from "@/components/product/ShadeSelector";
 import { QuantityStepper } from "@/components/product/QuantityStepper";
 import { useCart } from "@/stores/cart";
-import { formatKsh } from "@/lib/format";;
+import { formatKsh } from "@/lib/format";
 import Link from "next/link";
+import type { APIProductResponse } from "@/lib/db/schema";
 
-
-export default function ProductPageClientArea({ product, related }: { product: any, related: any }) {
+export default function ProductPageClientArea({ 
+  product, 
+  related 
+}: { 
+  product: APIProductResponse; 
+  related: APIProductResponse[]; 
+}) {
   const [shade, setShade] = useState(product.shades[0]);
   const [qty, setQty] = useState(1);
   const [galleryIdx, setGalleryIdx] = useState(0);
   const addItem = useCart((s: any) => s.addItem);
   const setCartOpen = useCart((s: any) => s.setOpen);
 
-  
+  const gallery = product.images && product.images.length > 0
+    ? product.images.map(img => img.storageKey)
+    : ["/placeholder.jpg"];
+
+  const price = typeof product.price === "string" ? parseFloat(product.price) : product.price;
+  const rating = typeof product.rating === "string" ? parseFloat(product.rating) : product.rating;
+  const reviewCount = typeof product.reviewCount === "string" ? parseInt(product.reviewCount, 10) : product.reviewCount;
+  const stock = typeof product.stock === "string" ? parseInt(product.stock, 10) : product.stock;
 
   return (
     <>
@@ -39,7 +52,7 @@ export default function ProductPageClientArea({ product, related }: { product: a
           <div>
             <div className="overflow-hidden rounded-[24px] bg-blush ring-1 ring-black/[0.04]">
               <img
-                src={product.gallery[galleryIdx]}
+                src={gallery[galleryIdx]}
                 alt={`${product.name} lip gloss`}
                 width={1000}
                 height={1250}
@@ -47,7 +60,7 @@ export default function ProductPageClientArea({ product, related }: { product: a
               />
             </div>
             <div className="mt-4 grid grid-cols-3 gap-3">
-              {product.gallery.map((src: string, i: number) => (
+              {gallery.map((src: string, i: number) => (
                 <button
                   key={i}
                   onClick={() => setGalleryIdx(i)}
@@ -78,9 +91,9 @@ export default function ProductPageClientArea({ product, related }: { product: a
             </h1>
             <div className="mt-4 flex items-center gap-4">
               <span className="text-2xl font-medium text-charcoal tabular-nums">
-                {formatKsh(product.price)}
+                {formatKsh(price)}
               </span>
-              <Rating value={product.rating} count={product.reviewCount} size="md" />
+              <Rating value={rating} count={reviewCount} size="md" />
             </div>
             <p className="mt-6 text-pretty text-zinc-600">{product.description}</p>
 
@@ -99,9 +112,9 @@ export default function ProductPageClientArea({ product, related }: { product: a
             <div className="mt-8 flex items-center gap-4">
               <QuantityStepper value={qty} onChange={setQty} />
               <p className="text-xs text-zinc-500">
-                {product.stock > 10
+                {stock > 10
                   ? "In stock"
-                  : `Only ${product.stock} left`}
+                  : `Only ${stock} left`}
               </p>
             </div>
 
@@ -113,7 +126,7 @@ export default function ProductPageClientArea({ product, related }: { product: a
                 }}
                 className="h-14 flex-1 rounded-full bg-charcoal text-sm font-medium text-white transition hover:opacity-90"
               >
-                Add to bag · {formatKsh(product.price * qty)}
+                Add to bag · {formatKsh(price * qty)}
               </button>
               <Link
                 href="/checkout"

@@ -1,21 +1,20 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { Product, Shade } from "@/data/products";
-import { StaticImageData } from "next/image";
+import type { APIProductResponse, DbShade } from "@/lib/db/schema";
 
 export type CartItem = {
   productSlug: string;
   productName: string;
-  productImage: string | StaticImageData;
+  productImage: string;
   price: number;
-  shade: Shade;
+  shade: DbShade;
   quantity: number;
 };
 
 export type CartState = {
   items: CartItem[];
   isOpen: boolean;
-  addItem: (product: Product, shade: Shade, quantity?: number) => void;
+  addItem: (product: APIProductResponse, shade: DbShade, quantity?: number) => void;
   removeItem: (slug: string, shadeName: string) => void;
   updateQuantity: (slug: string, shadeName: string, quantity: number) => void;
   clear: () => void;
@@ -47,8 +46,8 @@ export const useCart = create<CartState>()(
               {
                 productSlug: product.slug,
                 productName: product.name,
-                productImage: product.image,
-                price: product.price,
+                productImage: product.images?.[0]?.storageKey || "",
+                price: typeof product.price === 'string' ? parseFloat(product.price) : product.price,
                 shade,
                 quantity,
               },

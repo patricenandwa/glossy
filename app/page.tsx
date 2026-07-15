@@ -1,6 +1,6 @@
 import { ArrowRight, Play, Sparkles, Droplet, Truck, Leaf, Heart, ShieldCheck } from "lucide-react";
 import { ProductCard } from "@/components/product/ProductCard";
-import { getFeatured, getBestSellers } from "@/data/products";
+import { fetchFeaturedProducts, fetchBestSellers } from "@/lib/api";
 import { SITE } from "@/config/site";
 import heroImage from "@/assets/hero-editorial.jpg";
 import tiktokStill from "@/assets/social-tiktok-1.jpg";
@@ -13,7 +13,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 
-const metadata: Metadata = {
+export const metadata: Metadata = {
   title: "Glow & Go — Luxury Lip Gloss, Nairobi",
   description:
     "Cushioned, high-shine lip gloss handcrafted in Nairobi. Same-day delivery, purely for lips.",
@@ -30,9 +30,9 @@ const WHY_US = [
 
 const GALLERY = [g1, g2, g3, g4, tiktokStill, igStill];
 
-export default function Page() {
-  const featured = getFeatured();
-  const bestSellers = getBestSellers();
+export default async function Page() {
+  const featured = await fetchFeaturedProducts();
+  const bestSellers = await fetchBestSellers();
 
   return (
     <>

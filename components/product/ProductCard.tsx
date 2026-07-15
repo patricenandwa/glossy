@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import type { Product } from "@/data/products";
+import type { APIProductResponse } from "@/lib/db/schema";
 import { useCart } from "@/stores/cart";
 import { formatKsh } from "@/lib/format";
 import { Rating } from "./Rating";
@@ -10,9 +10,11 @@ import { ShadeSelector } from "./ShadeSelector";
 import Link from "next/link";
 import Image from "next/image";
 
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({ product }: { product: APIProductResponse }) {
   const [shade, setShade] = useState(product.shades[0]);
   const addItem = useCart((s: any) => s.addItem);
+
+  const productImage = product.images?.[0]?.storageKey || "/placeholder.jpg";
 
   return (
     <div className="group flex flex-col gap-4">
@@ -21,8 +23,8 @@ export function ProductCard({ product }: { product: Product }) {
         className="block overflow-hidden rounded-[24px] bg-blush/40 ring-1 ring-black/[0.04]"
       >
         <div className="aspect-[4/5] overflow-hidden">
-          <Image
-            src={product.image}
+          <img
+            src={productImage}
             alt={`${product.name} lip gloss by Glow & Go`}
             loading="lazy"
             width={800}
@@ -45,7 +47,7 @@ export function ProductCard({ product }: { product: Product }) {
             </p>
           </div>
           <span className="shrink-0 text-sm font-medium text-zinc-700 tabular-nums">
-            {formatKsh(product.price)}
+            {formatKsh(typeof product.price === "string" ? parseFloat(product.price) : product.price)}
           </span>
         </div>
         <div className="mt-3 flex items-center justify-between">
@@ -55,7 +57,7 @@ export function ProductCard({ product }: { product: Product }) {
             onSelect={setShade}
             size="sm"
           />
-          <Rating value={product.rating} />
+          <Rating value={typeof product.rating === "string" ? parseFloat(product.rating) : product.rating} />
         </div>
         <button
           type="button"

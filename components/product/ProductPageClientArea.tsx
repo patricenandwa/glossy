@@ -10,7 +10,12 @@ import { QuantityStepper } from "@/components/product/QuantityStepper";
 import { useCart } from "@/stores/cart";
 import { formatKsh } from "@/lib/format";
 import Link from "next/link";
-import type { APIProductResponse } from "@/lib/db/schema";
+import type { APIProductResponse, DbShade } from "@/lib/db/schema";
+
+const FALLBACK_SHADE: DbShade = {
+  name: "Signature",
+  hex: "#d7b49e",
+};
 
 export default function ProductPageClientArea({ 
   product, 
@@ -19,7 +24,7 @@ export default function ProductPageClientArea({
   product: APIProductResponse; 
   related: APIProductResponse[]; 
 }) {
-  const [shade, setShade] = useState(product.shades[0]);
+  const [shade, setShade] = useState<DbShade>(product.shades[0] ?? FALLBACK_SHADE);
   const [qty, setQty] = useState(1);
   const [galleryIdx, setGalleryIdx] = useState(0);
   const addItem = useCart((s: any) => s.addItem);
@@ -33,6 +38,19 @@ export default function ProductPageClientArea({
   const rating = typeof product.rating === "string" ? parseFloat(product.rating) : product.rating;
   const reviewCount = typeof product.reviewCount === "string" ? parseInt(product.reviewCount, 10) : product.reviewCount;
   const stock = typeof product.stock === "string" ? parseInt(product.stock, 10) : product.stock;
+  const hasShadeOptions = product.shades.length > 0;
+  const isOutOfStock = stock <= 0;
+
+  function addToCartAndNotify() {
+    if (isOutOfStock) {
+      toast.error(`${product.name} is currently out of stock`);
+      return false;
+    }
+
+    addItem(product, shade, qty);
+    toast.success(`${product.name} — ${shade.name} added`);
+    return true;
+  }
 
   return (
     <>
@@ -101,12 +119,18 @@ export default function ProductPageClientArea({
               <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-zinc-500">
                 Shade — <span className="text-charcoal">{shade.name}</span>
               </p>
-              <ShadeSelector
-                shades={product.shades}
-                selected={shade}
-                onSelect={setShade}
-                size="lg"
-              />
+              {hasShadeOptions ? (
+                <ShadeSelector
+                  shades={product.shades}
+                  selected={shade}
+                  onSelect={setShade}
+                  size="lg"
+                />
+              ) : (
+                <p className="text-sm text-zinc-500">
+                  We&apos;ll match this item with its default finish.
+                </p>
+              )}
             </div>
 
             <div className="mt-8 flex items-center gap-4">
@@ -121,20 +145,27 @@ export default function ProductPageClientArea({
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <button
                 onClick={() => {
-                  addItem(product, shade, qty);
-                  toast.success(`${product.name} — ${shade.name} added`);
+                  addToCartAndNotify();
                 }}
+                disabled={isOutOfStock}
                 className="h-14 flex-1 rounded-full bg-charcoal text-sm font-medium text-white transition hover:opacity-90"
               >
-                Add to bag · {formatKsh(price * qty)}
+                {isOutOfStock
+                  ? "Out of stock"
+                  : `Add to bag · ${formatKsh(price * qty)}`}
               </button>
               <Link
                 href="/checkout"
                 onClick={() => {
-                  addItem(product, shade, qty);
+                  if (!addToCartAndNotify()) {
+                    return;
+                  }
                   setCartOpen(false);
                 }}
-                className="grid h-14 flex-1 place-items-center rounded-full bg-white text-sm font-medium text-charcoal ring-1 ring-black/[0.08] hover:bg-blush"
+                aria-disabled={isOutOfStock}
+                className={`grid h-14 flex-1 place-items-center rounded-full bg-white text-sm font-medium text-charcoal ring-1 ring-black/[0.08] hover:bg-blush ${
+                  isOutOfStock ? "pointer-events-none opacity-60" : ""
+                }`}
               >
                 Buy it now
               </Link>

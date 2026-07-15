@@ -1,4 +1,5 @@
 import { ArrowRight, Play, Sparkles, Droplet, Truck, Leaf, Heart, ShieldCheck } from "lucide-react";
+import { EmptyStateCard } from "@/components/product/EmptyStateCard";
 import { ProductCard } from "@/components/product/ProductCard";
 import { fetchFeaturedProducts, fetchBestSellers } from "@/lib/api";
 import { SITE } from "@/config/site";
@@ -107,19 +108,31 @@ export default async function Page() {
               View all
             </Link>
           </div>
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {featured.map((p) => (
-              <ProductCard key={p.slug} product={p} />
-            ))}
-          </div>
-          <div className="mt-10 sm:hidden">
-            <Link
+          {featured.length === 0 ? (
+            <EmptyStateCard
+              eyebrow="Featured collection"
+              title="Our featured glosses are taking a short beauty break."
+              description="Nothing is highlighted right now, but the full collection will be back once inventory is refreshed."
               href="/shop"
-              className="block w-full rounded-full bg-charcoal py-4 text-center text-sm font-medium text-white"
-            >
-              View all glosses
-            </Link>
-          </div>
+              actionLabel="Check the shop"
+            />
+          ) : (
+            <>
+              <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+                {featured.map((p) => (
+                  <ProductCard key={p.slug} product={p} />
+                ))}
+              </div>
+              <div className="mt-10 sm:hidden">
+                <Link
+                  href="/shop"
+                  className="block w-full rounded-full bg-charcoal py-4 text-center text-sm font-medium text-white"
+                >
+                  View all glosses
+                </Link>
+              </div>
+            </>
+          )}
         </div>
       </section>
 
@@ -225,16 +238,26 @@ export default async function Page() {
               View all
             </Link>
           </div>
-          <div className="-mx-5 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-4 no-scrollbar sm:mx-0 sm:px-0">
-            {bestSellers.map((p) => (
-              <div
-                key={p.slug}
-                className="w-[75%] shrink-0 snap-start sm:w-[300px]"
-              >
-                <ProductCard product={p} />
-              </div>
-            ))}
-          </div>
+          {bestSellers.length === 0 ? (
+            <EmptyStateCard
+              eyebrow="Best sellers"
+              title="Customer favourites will be back soon."
+              description="Our bestselling picks are currently out of inventory. Browse the full range to see what is available next."
+              href="/shop"
+              actionLabel="Explore all glosses"
+            />
+          ) : (
+            <div className="-mx-5 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-4 no-scrollbar sm:mx-0 sm:px-0">
+              {bestSellers.map((p) => (
+                <div
+                  key={p.slug}
+                  className="w-[75%] shrink-0 snap-start sm:w-[300px]"
+                >
+                  <ProductCard product={p} />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

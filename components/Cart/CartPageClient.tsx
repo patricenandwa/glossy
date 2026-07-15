@@ -1,6 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
+import { EmptyStateCard } from "@/components/product/EmptyStateCard";
 import { QuantityStepper } from "@/components/product/QuantityStepper";
 import { useCart } from "@/stores/cart";
 import { formatKsh } from "@/lib/format";
@@ -30,18 +31,13 @@ export default function CartPageClient() {
       <section className="bg-white py-14 sm:py-20">
         <div className="mx-auto max-w-4xl px-5 sm:px-8">
           {items.length === 0 ? (
-            <div className="rounded-3xl bg-soft-pink p-14 text-center ring-1 ring-black/[0.04]">
-              <p className="font-serif text-2xl text-charcoal">Nothing here yet.</p>
-              <p className="mt-2 text-sm text-zinc-500">
-                Discover our signature glosses.
-              </p>
-              <Link
-                href="/shop"
-                className="mt-8 inline-flex h-12 items-center rounded-full bg-charcoal px-7 text-sm font-medium text-white"
-              >
-                Shop the collection
-              </Link>
-            </div>
+            <EmptyStateCard
+              eyebrow="Your bag"
+              title="Nothing here yet."
+              description="Your bag is empty for now. Browse our gloss collection and add your next everyday shine."
+              href="/shop"
+              actionLabel="Shop the collection"
+            />
           ) : (
             <div className="grid gap-10 lg:grid-cols-[1fr_360px]">
               <ul className="divide-y divide-black/[0.06]">

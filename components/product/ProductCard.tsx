@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import type { APIProductResponse } from "@/lib/db/schema";
+import type { APIProductResponse, DbShade } from "@/lib/db/schema";
 import { useCart } from "@/stores/cart";
 import { formatKsh } from "@/lib/format";
 import { Rating } from "./Rating";
@@ -10,11 +10,24 @@ import { ShadeSelector } from "./ShadeSelector";
 import Link from "next/link";
 import Image from "next/image";
 
+const FALLBACK_SHADE: DbShade = {
+  name: "Signature",
+  hex: "#d7b49e",
+};
+
 export function ProductCard({ product }: { product: APIProductResponse }) {
-  const [shade, setShade] = useState(product.shades[0]);
+  const [shade, setShade] = useState<DbShade>(product.shades[0] ?? FALLBACK_SHADE);
   const addItem = useCart((s: any) => s.addItem);
 
   const productImage = product.images?.[0]?.storageKey || "/placeholder.jpg";
+  const price =
+    typeof product.price === "string" ? parseFloat(product.price) : product.price;
+  const rating =
+    typeof product.rating === "string" ? parseFloat(product.rating) : product.rating;
+  const stock =
+    typeof product.stock === "string" ? parseInt(product.stock, 10) : product.stock;
+  const isOutOfStock = stock <= 0;
+  const hasShadeOptions = product.shades.length > 0;
 
   return (
     <div className="group flex flex-col gap-4">
@@ -23,7 +36,7 @@ export function ProductCard({ product }: { product: APIProductResponse }) {
         className="block overflow-hidden rounded-[24px] bg-blush/40 ring-1 ring-black/[0.04]"
       >
         <div className="aspect-[4/5] overflow-hidden">
-          <img
+          <Image
             src={productImage}
             alt={`${product.name} lip gloss by Glow & Go`}
             loading="lazy"
@@ -47,27 +60,37 @@ export function ProductCard({ product }: { product: APIProductResponse }) {
             </p>
           </div>
           <span className="shrink-0 text-sm font-medium text-zinc-700 tabular-nums">
-            {formatKsh(typeof product.price === "string" ? parseFloat(product.price) : product.price)}
+            {formatKsh(price)}
           </span>
         </div>
         <div className="mt-3 flex items-center justify-between">
-          <ShadeSelector
-            shades={product.shades}
-            selected={shade}
-            onSelect={setShade}
-            size="sm"
-          />
-          <Rating value={typeof product.rating === "string" ? parseFloat(product.rating) : product.rating} />
+          {hasShadeOptions ? (
+            <ShadeSelector
+              shades={product.shades}
+              selected={shade}
+              onSelect={setShade}
+              size="sm"
+            />
+          ) : (
+            <p className="text-xs text-zinc-500">Shade will be selected for you.</p>
+          )}
+          <Rating value={rating} />
         </div>
         <button
           type="button"
           onClick={() => {
+            if (isOutOfStock) {
+              toast.error(`${product.name} is currently out of stock`);
+              return;
+            }
+
             addItem(product, shade);
             toast.success(`${product.name} — ${shade.name} added`);
           }}
-          className="mt-5 w-full rounded-full bg-white py-3 text-sm font-medium text-charcoal ring-1 ring-black/[0.06] transition hover:bg-charcoal hover:text-white"
+          disabled={isOutOfStock}
+          className="mt-5 w-full rounded-full bg-white py-3 text-sm font-medium text-charcoal ring-1 ring-black/[0.06] transition hover:bg-charcoal hover:text-white disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-white disabled:hover:text-charcoal"
         >
-          Quick add
+          {isOutOfStock ? "Out of stock" : "Quick add"}
         </button>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { ProductCard } from "@/components/product/ProductCard";
+import { EmptyStateCard } from "@/components/product/EmptyStateCard";
 import { fetchProducts } from "@/lib/api";
 import { Metadata } from "next";
 
@@ -33,11 +34,21 @@ export default async function ShopPage() {
       </section>
       <section className="bg-white py-14 sm:py-20">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
-          <div className="grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {products.map((p) => (
-              <ProductCard key={p.slug} product={p} />
-            ))}
-          </div>
+          {products.length === 0 ? (
+            <EmptyStateCard
+              eyebrow="Inventory update"
+              title="The gloss shelves are being restocked."
+              description="We do not have any products available right now, but fresh shine is on the way. Check back soon or start with our latest highlights on the homepage."
+              href="/"
+              actionLabel="Browse the homepage"
+            />
+          ) : (
+            <div className="grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {products.map((p) => (
+                <ProductCard key={p.slug} product={p} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </>

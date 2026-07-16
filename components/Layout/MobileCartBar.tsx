@@ -6,10 +6,12 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 
 export function MobileCartBar() {
+  const hasHydrated = useCart((s: any) => s.hasHydrated);
   const count = useCart((s: any) => s.itemCount());
   const subtotal = useCart((s: any) => s.subtotal());
   const pathname = usePathname();
 
+  if (!hasHydrated) return null;
   if (count === 0) return null;
   if (pathname === "/cart" || pathname === "/checkout") return null;
   if (pathname.startsWith("/order-confirmed")) return null;

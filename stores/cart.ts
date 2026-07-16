@@ -14,18 +14,15 @@ export type CartItem = {
 export type CartState = {
   items: CartItem[];
   isOpen: boolean;
+  hasHydrated: boolean;
   addItem: (product: APIProductResponse, shade: DbShade, quantity?: number) => void;
   removeItem: (slug: string, shadeName: string) => void;
   updateQuantity: (slug: string, shadeName: string, quantity: number) => void;
   clear: () => void;
   setOpen: (open: boolean) => void;
+  setHasHydrated: (hydrated: boolean) => void;
   itemCount: () => number;
   subtotal: () => number;
-};
-
-const FALLBACK_SHADE: DbShade = {
-  name: "Signature",
-  hex: "#d7b49e",
 };
 
 function isValidShade(value: unknown): value is DbShade {
@@ -41,13 +38,17 @@ function isValidShade(value: unknown): value is DbShade {
   );
 }
 
-function normalizeShade(shade: unknown, fallbackShades: unknown[] = []): DbShade {
+function isLegacyFallbackShade(shade: DbShade) {
+  return shade.name === "Signature" && shade.hex === "#d7b49e";
+}
+
+function normalizeShade(shade: unknown, fallbackShades: unknown[] = []): DbShade | null {
   if (isValidShade(shade)) {
-    return shade;
+    return isLegacyFallbackShade(shade) ? null : shade;
   }
 
   const fallbackShade = fallbackShades.find(isValidShade);
-  return fallbackShade ?? FALLBACK_SHADE;
+  return fallbackShade ?? null;
 }
 
 function normalizePrice(price: unknown) {
@@ -101,6 +102,11 @@ function sanitizeCartItems(items: unknown): CartItem[] {
       return [];
     }
 
+    const shade = normalizeShade(candidate.shade);
+    if (!shade) {
+      return [];
+    }
+
     return [
       {
         productSlug: candidate.productSlug,
@@ -110,7 +116,7 @@ function sanitizeCartItems(items: unknown): CartItem[] {
             ? candidate.productImage
             : "/placeholder.jpg",
         price: normalizePrice(candidate.price),
-        shade: normalizeShade(candidate.shade),
+        shade,
         quantity: normalizeQuantity(candidate.quantity),
       },
     ];
@@ -122,9 +128,13 @@ export const useCart = create<CartState>()(
     (set, get) => ({
       items: [],
       isOpen: false,
+      hasHydrated: false,
       addItem: (product, shade, quantity = 1) =>
         set((state) => {
           const normalizedShade = normalizeShade(shade, product.shades);
+          if (!normalizedShade) {
+            return state;
+          }
           const normalizedQuantity = normalizeQuantity(quantity);
           const existing = state.items.find(
             (i) => i.productSlug === product.slug && i.shade.name === normalizedShade.name,
@@ -170,19 +180,24 @@ export const useCart = create<CartState>()(
         })),
       clear: () => set({ items: [] }),
       setOpen: (isOpen) => set({ isOpen }),
+      setHasHydrated: (hasHydrated) => set({ hasHydrated }),
       itemCount: () => get().items.reduce((n, i) => n + i.quantity, 0),
       subtotal: () => get().items.reduce((s, i) => s + i.price * i.quantity, 0),
     }),
     {
       name: "glow-and-go-cart",
-      version: 2,
+      version: 3,
       migrate: (persistedState) => {
         const state = persistedState as Partial<CartState> | undefined;
 
         return {
           items: sanitizeCartItems(state?.items),
           isOpen: typeof state?.isOpen === "boolean" ? state.isOpen : false,
+          hasHydrated: true,
         };
+      },
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
       },
     },
   ),

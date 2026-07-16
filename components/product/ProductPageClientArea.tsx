@@ -12,11 +12,6 @@ import { formatKsh } from "@/lib/format";
 import Link from "next/link";
 import type { APIProductResponse, DbShade } from "@/lib/db/schema";
 
-const FALLBACK_SHADE: DbShade = {
-  name: "Signature",
-  hex: "#d7b49e",
-};
-
 export default function ProductPageClientArea({ 
   product, 
   related 
@@ -24,11 +19,11 @@ export default function ProductPageClientArea({
   product: APIProductResponse; 
   related: APIProductResponse[]; 
 }) {
-  const [shade, setShade] = useState<DbShade>(product.shades[0] ?? FALLBACK_SHADE);
+  const [shade, setShade] = useState<DbShade | null>(product.shades[0] ?? null);
   const [qty, setQty] = useState(1);
   const [galleryIdx, setGalleryIdx] = useState(0);
-  const addItem = useCart((s: any) => s.addItem);
-  const setCartOpen = useCart((s: any) => s.setOpen);
+  const addItem = useCart((state) => state.addItem);
+  const setCartOpen = useCart((state) => state.setOpen);
 
   const gallery = product.images && product.images.length > 0
     ? product.images.map(img => img.storageKey)
@@ -39,11 +34,13 @@ export default function ProductPageClientArea({
   const reviewCount = typeof product.reviewCount === "string" ? parseInt(product.reviewCount, 10) : product.reviewCount;
   const stock = typeof product.stock === "string" ? parseInt(product.stock, 10) : product.stock;
   const hasShadeOptions = product.shades.length > 0;
-  const isOutOfStock = stock <= 0;
+  const isOutOfStock = stock <= 0 || !shade;
 
   function addToCartAndNotify() {
     if (isOutOfStock) {
-      toast.error(`${product.name} is currently out of stock`);
+      toast.error(
+        shade ? `${product.name} is currently out of stock` : `No shade is configured for ${product.name} yet`,
+      );
       return false;
     }
 
@@ -117,7 +114,7 @@ export default function ProductPageClientArea({
 
             <div className="mt-8">
               <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-zinc-500">
-                Shade — <span className="text-charcoal">{shade.name}</span>
+                Shade — <span className="text-charcoal">{shade?.name ?? "Unavailable"}</span>
               </p>
               {hasShadeOptions ? (
                 <ShadeSelector
@@ -128,7 +125,7 @@ export default function ProductPageClientArea({
                 />
               ) : (
                 <p className="text-sm text-zinc-500">
-                  We&apos;ll match this item with its default finish.
+                  This product needs at least one configured shade before it can be ordered.
                 </p>
               )}
             </div>
@@ -221,7 +218,7 @@ export default function ProductPageClientArea({
             You may also love
           </h2>
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {related.map((p: any) => (
+            {related.map((p) => (
               <ProductCard key={p.slug} product={p} />
             ))}
           </div>

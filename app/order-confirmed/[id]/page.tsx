@@ -1,4 +1,5 @@
 import OrderConfirmedPageClient from "@/components/Order/OrderConfirmedPageClient";
+import { fetchPublicOrderByOrderNumber } from "@/lib/orders";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -7,6 +8,8 @@ export const metadata: Metadata = {
   robots: "noindex",
 };
 
-export default function OrderConfirmedPage() {
-  return <OrderConfirmedPageClient />;
+export default async function OrderConfirmedPage(props: PageProps<"/order-confirmed/[id]">) {
+  const { id } = await props.params;
+  const order = await fetchPublicOrderByOrderNumber(id);
+  return <OrderConfirmedPageClient order={order} />;
 }

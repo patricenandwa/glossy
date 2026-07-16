@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import type { APIProductResponse, DbShade } from "@/lib/db/schema";
 import { useCart } from "@/stores/cart";
@@ -10,14 +10,12 @@ import { ShadeSelector } from "./ShadeSelector";
 import Link from "next/link";
 import Image from "next/image";
 
-const FALLBACK_SHADE: DbShade = {
-  name: "Signature",
-  hex: "#d7b49e",
-};
-
 export function ProductCard({ product }: { product: APIProductResponse }) {
-  const [shade, setShade] = useState<DbShade>(product.shades[0] ?? FALLBACK_SHADE);
-  const addItem = useCart((s: any) => s.addItem);
+  useEffect(() => {
+    console.log(product);
+  }, [product]);
+  const [shade, setShade] = useState<DbShade | null>(product.shades[0] ?? null);
+  const addItem = useCart((state) => state.addItem);
 
   const productImage = product.images?.[0]?.storageKey || "/placeholder.jpg";
   const price =
@@ -26,7 +24,8 @@ export function ProductCard({ product }: { product: APIProductResponse }) {
     typeof product.rating === "string" ? parseFloat(product.rating) : product.rating;
   const stock =
     typeof product.stock === "string" ? parseInt(product.stock, 10) : product.stock;
-  const isOutOfStock = stock <= 0;
+  console.log(shade)
+  const isOutOfStock = stock <= 0 || !shade;
   const hasShadeOptions = product.shades.length > 0;
 
   return (
@@ -72,7 +71,7 @@ export function ProductCard({ product }: { product: APIProductResponse }) {
               size="sm"
             />
           ) : (
-            <p className="text-xs text-zinc-500">Shade will be selected for you.</p>
+            <p className="text-xs text-zinc-500">No shade configured yet.</p>
           )}
           <Rating value={rating} />
         </div>
@@ -80,7 +79,9 @@ export function ProductCard({ product }: { product: APIProductResponse }) {
           type="button"
           onClick={() => {
             if (isOutOfStock) {
-              toast.error(`${product.name} is currently out of stock`);
+              toast.error(
+                shade ? `${product.name} is currently out of stock` : `No shade is configured for ${product.name} yet`,
+              );
               return;
             }
 

@@ -8,10 +8,34 @@ import { formatKsh } from "@/lib/format";
 import Link from "next/link";
 
 export default function CartPageClient() {
+  const hasHydrated = useCart((s: any) => s.hasHydrated);
   const items = useCart((s: any) => s.items);
   const removeItem = useCart((s: any) => s.removeItem);
   const updateQty = useCart((s: any) => s.updateQuantity);
   const subtotal = useCart((s: any) => s.subtotal());
+
+  if (!hasHydrated) {
+    return (
+      <>
+        <section className="bg-soft-pink pt-14 pb-10 sm:pt-20 sm:pb-14">
+          <div className="mx-auto max-w-4xl px-5 sm:px-8">
+            <h1 className="font-serif text-5xl leading-none text-charcoal sm:text-6xl">
+              Your bag
+            </h1>
+            <p className="mt-3 text-zinc-600">Loading your saved items.</p>
+          </div>
+        </section>
+
+        <section className="bg-white py-14 sm:py-20">
+          <div className="mx-auto max-w-4xl px-5 sm:px-8">
+            <div className="rounded-3xl bg-soft-pink p-10 text-center ring-1 ring-black/[0.04] sm:p-14">
+              <p className="font-serif text-2xl text-charcoal">Loading your bag...</p>
+            </div>
+          </div>
+        </section>
+      </>
+    );
+  }
 
   return (
     <>

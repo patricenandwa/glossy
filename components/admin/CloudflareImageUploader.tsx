@@ -100,7 +100,7 @@ export function CloudflareImageUploader({
     setProgress(0)
 
     try {
-      const response = await fetch("/api/vi/images", {
+      const response = await fetch("/api/v1/images", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -160,19 +160,19 @@ export function CloudflareImageUploader({
   if (previewUrl) {
     return (
       <div className={cn("relative flex flex-col items-center justify-center overflow-hidden rounded-2xl border bg-muted/50 p-2", className)}>
-        <img 
-          src={previewUrl} 
-          alt="Preview" 
-          className={cn("h-48 w-full rounded-xl object-cover transition-opacity", isUploading ? "opacity-50" : "opacity-100")} 
+        <img
+          src={previewUrl}
+          alt="Preview"
+          className={cn("h-48 w-full rounded-xl object-cover transition-opacity", isUploading ? "opacity-50" : "opacity-100")}
         />
-        
+
         {isUploading ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
             <Loader2 className="h-8 w-8 animate-spin text-charcoal" />
             <div className="w-1/2 overflow-hidden rounded-full bg-white/50 ring-1 ring-black/10">
-              <div 
-                className="h-1.5 bg-charcoal transition-all duration-200 ease-out" 
-                style={{ width: `${progress}%` }} 
+              <div
+                className="h-1.5 bg-charcoal transition-all duration-200 ease-out"
+                style={{ width: `${progress}%` }}
               />
             </div>
             <span className="text-xs font-medium text-charcoal">{statusMessage} {Math.round(progress)}%</span>

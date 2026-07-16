@@ -1,4 +1,3 @@
-import { type OrderStatus } from "@/stores/orders";
 import { Metadata } from "next";
 import TrackPageClientArea from "@/components/Track/TrackPageClientArea";
 
@@ -7,12 +6,13 @@ export const metadata: Metadata = {
   description: "Track your Glow & Go delivery in Nairobi with your order number and phone.",
 };
 
-const STEPS: { key: OrderStatus; label: string; caption: string }[] = [
-  { key: "received", label: "Order received", caption: "We got it — thank you." },
-  { key: "preparing", label: "Preparing", caption: "Being hand-packed in Kilimani." },
-  { key: "out_for_delivery", label: "Out for delivery", caption: "On the way to you." },
+const STEPS = [
+  { key: "pending", label: "Order received", caption: "We got it and we’re validating the order." },
+  { key: "confirmed", label: "Confirmed", caption: "Your order is accepted and ready for fulfilment." },
+  { key: "processing", label: "Preparing", caption: "Being hand-packed in the studio." },
+  { key: "shipped", label: "Out for delivery", caption: "On the way to you." },
   { key: "delivered", label: "Delivered", caption: "Enjoy your glow." },
-];
+] as const;
 
 export default function TrackPage() {
   return (
@@ -23,7 +23,7 @@ export default function TrackPage() {
             Order tracking
           </p>
           <h1 className="font-serif text-5xl leading-none text-charcoal sm:text-6xl">
-            Where's your glow?
+            Where&apos;s your glow?
           </h1>
           <p className="mt-4 max-w-[42ch] text-zinc-600">
             Enter your order number and the phone you used to check out.

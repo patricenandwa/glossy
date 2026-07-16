@@ -7,7 +7,7 @@ export function ShadeSelector({
   size = "md",
 }: {
   shades: DbShade[];
-  selected: DbShade;
+  selected: DbShade | null;
   onSelect: (s: DbShade) => void;
   size?: "sm" | "md" | "lg";
 }) {
@@ -15,7 +15,7 @@ export function ShadeSelector({
   return (
     <div className="flex flex-wrap items-center gap-2">
       {shades.map((s) => {
-        const isActive = s.name === selected.name;
+        const isActive = s.name === selected?.name;
         return (
           <button
             key={s.name}

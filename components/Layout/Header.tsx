@@ -14,6 +14,7 @@ interface HeaderProps {
 
 export default function Header({ onMenuClick }: HeaderProps) {
   const pathname = usePathname();
+  const hasHydrated = useCart((s: CartState) => s.hasHydrated);
   const count = useCart((s: CartState) => s.itemCount());
 
   return (
@@ -75,7 +76,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
             className="relative flex h-9 items-center gap-2 rounded-full px-3 text-sm font-medium text-charcoal ring-1 ring-black/[0.06] hover:bg-white transition-all duration-200"
           >
             <ShoppingBag className="size-4" strokeWidth={1.5} />
-            <span className="tabular-nums">{count}</span>
+            <span className="tabular-nums">{hasHydrated ? count : 0}</span>
           </Link>
         </div>
       </div>

@@ -35,9 +35,18 @@ export const relations = defineRelations(schema, (r) => ({
       from: r.ordersTable.id,
       to: r.orderItemsTable.orderId,
     }),
+    payments: r.many.paymentsTable({
+      from: r.ordersTable.id,
+      to: r.paymentsTable.orderId,
+    }),
     delivery: r.one.deliveriesTable({
       from: r.ordersTable.id,
       to: r.deliveriesTable.orderId,
+    }),
+    customer: r.one.customersTable({
+      from: r.ordersTable.customerId,
+      to: r.customersTable.id,
+      optional: false,
     }),
   },
   orderItemsTable: {
@@ -48,6 +57,19 @@ export const relations = defineRelations(schema, (r) => ({
     }),
     order: r.one.ordersTable({
       from: r.orderItemsTable.orderId,
+      to: r.ordersTable.id,
+      optional: false,
+    }),
+  },
+  customersTable: {
+    orders: r.many.ordersTable({
+      from: r.customersTable.id,
+      to: r.ordersTable.customerId,
+    }),
+  },
+  paymentsTable: {
+    order: r.one.ordersTable({
+      from: r.paymentsTable.orderId,
       to: r.ordersTable.id,
       optional: false,
     }),

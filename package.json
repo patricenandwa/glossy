@@ -22,6 +22,7 @@
     "dotenv": "^17.4.2",
     "drizzle-orm": "1.0.0-rc.4",
     "embla-carousel-react": "^8.6.0",
+    "firebase": "^12.16.0",
     "framer-motion": "^12.42.2",
     "input-otp": "^1.4.2",
     "lucide-react": "^1.24.0",

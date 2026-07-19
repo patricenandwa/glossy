@@ -1,6 +1,8 @@
 import * as React from "react"
 import Link from "next/link"
+import { redirect } from "next/navigation"
 import { Package, Users, ShoppingCart, LayoutDashboard, Tags } from "lucide-react"
+import { requireAdmin } from "@/lib/auth/getUserFromSession"
 
 import {
   Sidebar,
@@ -47,11 +49,17 @@ const data = {
   ],
 }
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const adminUser = await requireAdmin()
+
+  if (!adminUser) {
+    redirect("/login?redirect=/admin")
+  }
+
   return (
     <SidebarProvider>
       <Sidebar>

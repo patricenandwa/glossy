@@ -1,4 +1,5 @@
 import {
+  boolean,
   index,
   jsonb,
   numeric,
@@ -40,6 +41,8 @@ export const deliveryStatusEnum = pgEnum("delivery_status", [
   "failed",
   "cancelled",
 ]);
+
+export const userRoleEnum = pgEnum("user_role", ["admin", "user"]);
 
 export const productsTable = pgTable("products", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -173,6 +176,20 @@ export const deliveriesTable = pgTable("deliveries", {
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow().$onUpdate(() => new Date()),
 });
+
+export const users = pgTable("users", {
+  firebaseUid: text("firebase_uid").unique().notNull(),
+  email: text("email").notNull().unique(),
+  displayName: text("display_name"),
+  photoURL: text("photo_url"),
+  provider: text("provider"),
+  emailVerified: boolean("email_verified").notNull().default(false),
+  role: userRoleEnum("role").notNull().default("user"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").$onUpdate(() => new Date()).defaultNow().notNull(),
+}, (table) => [
+  index("users_role_idx").on(table.role),
+]);
 
 export interface DbShade {
   name: string;

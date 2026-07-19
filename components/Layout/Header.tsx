@@ -1,21 +1,26 @@
 "use client";
 
-import { Menu, Search, ShoppingBag, User } from "lucide-react";
+import { LayoutDashboard, LogIn, Menu, Search, ShoppingBag, User } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { menuItems } from "@/lib/constants";
 import { useCart, type CartState } from "@/stores/cart";
 import Link from "next/link";
 import { SITE as siteConfig } from "@/config/site";
+import type { SessionUser } from "@/types";
 
 interface HeaderProps {
   onMenuClick?: () => void;
   showNewMenuBadge?: boolean;
+  user: SessionUser | null;
 }
 
-export default function Header({ onMenuClick }: HeaderProps) {
+export default function Header({ onMenuClick, user }: HeaderProps) {
   const pathname = usePathname();
   const hasHydrated = useCart((s: CartState) => s.hasHydrated);
   const count = useCart((s: CartState) => s.itemCount());
+  const isAdmin = user?.role === "admin";
+  const adminHref = isAdmin ? "/admin" : "/login?redirect=/admin";
+  const adminLabel = isAdmin ? "Admin" : "Login";
 
   return (
     <header className="sticky top-0 z-40 border-b border-black/[0.04] bg-soft-pink/85 backdrop-blur-md">
@@ -71,6 +76,13 @@ export default function Header({ onMenuClick }: HeaderProps) {
           >
             <User className="size-4" strokeWidth={1.5} />
           </button>
+          <Link
+            href={adminHref}
+            className="hidden sm:inline-flex h-9 items-center gap-2 rounded-full bg-white px-3.5 text-sm font-medium text-charcoal ring-1 ring-black/[0.06] transition-all duration-200 hover:bg-blush"
+          >
+            {isAdmin ? <LayoutDashboard className="size-4" strokeWidth={1.5} /> : <LogIn className="size-4" strokeWidth={1.5} />}
+            <span>{adminLabel}</span>
+          </Link>
           <Link
             href="/cart"
             className="relative flex h-9 items-center gap-2 rounded-full px-3 text-sm font-medium text-charcoal ring-1 ring-black/[0.06] hover:bg-white transition-all duration-200"

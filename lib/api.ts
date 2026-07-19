@@ -151,8 +151,10 @@ async function fetchMappedProducts(products: ProductRow[]) {
 }
 
 export async function fetchProducts(): Promise<APIProductResponse[]> {
-  const products = await db.select().from(productsTable).orderBy(desc(productsTable.createdAt))
-  console.log(products);
+  const products = await db
+    .select()
+    .from(productsTable)
+    .orderBy(desc(productsTable.createdAt))
   return fetchMappedProducts(products)
 }
 

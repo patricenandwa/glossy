@@ -344,7 +344,7 @@ export function NewProductPageClient({ categories }: NewProductPageClientProps) 
             <div className="mb-4 flex items-center justify-between gap-3">
               <div>
                 <h2 className="font-medium text-charcoal">Benefits</h2>
-                <p className="text-sm text-zinc-500">Keep each benefit short so it reads well on product cards and details.</p>
+                <p className="text-sm text-zinc-500">Add product benefits if you want them shown on cards and detail pages.</p>
               </div>
               <Button type="button" variant="outline" size="sm" onClick={addBenefit} disabled={isPending}>
                 <Plus className="mr-2 h-4 w-4" />
@@ -352,6 +352,11 @@ export function NewProductPageClient({ categories }: NewProductPageClientProps) 
               </Button>
             </div>
             <div className="grid gap-3">
+              {formValues.benefits.length === 0 && (
+                <p className="rounded-lg border border-dashed px-4 py-3 text-sm text-zinc-500">
+                  No benefits added yet.
+                </p>
+              )}
               {formValues.benefits.map((benefit, index) => (
                 <div key={`benefit-${index}`} className="flex gap-3">
                   <Input
@@ -364,7 +369,7 @@ export function NewProductPageClient({ categories }: NewProductPageClientProps) 
                     type="button"
                     variant="ghost"
                     size="icon"
-                    disabled={isPending || formValues.benefits.length === 1}
+                    disabled={isPending}
                     onClick={() => removeBenefit(index)}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -379,11 +384,11 @@ export function NewProductPageClient({ categories }: NewProductPageClientProps) 
             <h2 className="mb-4 font-medium text-charcoal">Formula Details</h2>
             <div className="grid gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="ingredients">Ingredients *</Label>
+                <Label htmlFor="ingredients">Ingredients</Label>
                 <Textarea
                   id="ingredients"
                   name="ingredients"
-                  placeholder="List the main ingredients..."
+                  placeholder="List the main ingredients if available..."
                   disabled={isPending}
                   value={formValues.ingredients}
                   onChange={handleInputChange}
@@ -393,11 +398,11 @@ export function NewProductPageClient({ categories }: NewProductPageClientProps) 
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="howToUse">How To Use *</Label>
+                <Label htmlFor="howToUse">How To Use</Label>
                 <Textarea
                   id="howToUse"
                   name="howToUse"
-                  placeholder="Explain how the customer should apply it..."
+                  placeholder="Explain how the customer should apply it if needed..."
                   disabled={isPending}
                   value={formValues.howToUse}
                   onChange={handleInputChange}

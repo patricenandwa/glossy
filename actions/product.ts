@@ -152,11 +152,11 @@ export async function createProductAction(
           rating: "0",
           reviewCount: "0",
           stock: String(data.stock),
-          badge: data.status === "draft" ? "draft" : data.badge === "none" ? "" : data.badge,
+          badge: data.status === "draft" ? "draft" : data.badge === "none" ? null : data.badge,
           description: data.description,
-          benefits: data.benefits,
-          ingredients: data.ingredients,
-          howToUse: data.howToUse,
+          benefits: data.benefits.length > 0 ? data.benefits : null,
+          ingredients: data.ingredients ?? null,
+          howToUse: data.howToUse ?? null,
           categoryId: category.id,
         })
         .returning({

@@ -48,14 +48,14 @@ export const productsTable = pgTable("products", {
   tagline: text("tagline").notNull(),
   price: numeric("price").notNull(),
   shades: jsonb("shades").notNull(),
-  rating: numeric("rating").notNull(),
-  reviewCount: numeric("reviewCount").notNull(),
+  rating: numeric("rating").notNull().default("3.0"),
+  reviewCount: numeric("reviewCount").notNull().default("0"),
   stock: numeric("stock").notNull(),
-  badge: text("badge").notNull(),
+  badge: text("badge"),
   description: text("description").notNull(),
-  benefits: jsonb("benefits").notNull(),
-  ingredients: text("ingredients").notNull(),
-  howToUse: text("howToUse").notNull(),
+  benefits: jsonb("benefits"),
+  ingredients: text("ingredients"),
+  howToUse: text("howToUse"),
   categoryId: uuid("categoryId").notNull().references(() => categoriesTable.id),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow().$onUpdate(() => new Date()),
@@ -197,11 +197,11 @@ export interface APIProductResponse {
   rating: number;
   reviewCount: number;
   stock: number;
-  badge: string;
+  badge: string | null;
   description: string;
   benefits: string[];
-  ingredients: string;
-  howToUse: string;
+  ingredients: string | null;
+  howToUse: string | null;
   categoryId: string;
   createdAt: string | Date;
   updatedAt: string | Date;

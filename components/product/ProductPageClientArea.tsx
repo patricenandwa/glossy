@@ -190,22 +190,28 @@ export default function ProductPageClientArea({
             </div>
 
             <div className="mt-10 space-y-8">
-              <Section title="Benefits">
-                <ul className="space-y-2 text-sm text-zinc-600">
-                  {product.benefits.map((b: string) => (
-                    <li key={b} className="flex gap-2">
-                      <span className="mt-2 size-1 shrink-0 rounded-full bg-rose-gold" />
-                      {b}
-                    </li>
-                  ))}
-                </ul>
-              </Section>
-              <Section title="How to use">
-                <p className="text-sm text-zinc-600">{product.howToUse}</p>
-              </Section>
-              <Section title="Ingredients">
-                <p className="text-sm text-zinc-600">{product.ingredients}</p>
-              </Section>
+              {product.benefits.length > 0 && (
+                <Section title="Benefits">
+                  <ul className="space-y-2 text-sm text-zinc-600">
+                    {product.benefits.map((b: string) => (
+                      <li key={b} className="flex gap-2">
+                        <span className="mt-2 size-1 shrink-0 rounded-full bg-rose-gold" />
+                        {b}
+                      </li>
+                    ))}
+                  </ul>
+                </Section>
+              )}
+              {product.howToUse && (
+                <Section title="How to use">
+                  <p className="text-sm text-zinc-600">{product.howToUse}</p>
+                </Section>
+              )}
+              {product.ingredients && (
+                <Section title="Ingredients">
+                  <p className="text-sm text-zinc-600">{product.ingredients}</p>
+                </Section>
+              )}
             </div>
           </div>
         </div>

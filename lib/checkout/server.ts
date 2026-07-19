@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import {
@@ -34,6 +34,7 @@ export const checkoutPayloadSchema = z.object({
 });
 
 type CheckoutInput = z.infer<typeof checkoutPayloadSchema>;
+type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 export type CheckoutResult =
   | {
@@ -68,6 +69,12 @@ export type PaystackVerificationPayload = {
   metadata?: Record<string, unknown> | null;
 };
 
+type InventoryAdjustmentItem = {
+  productId: string;
+  productName: string;
+  quantity: number;
+};
+
 function parseNumber(value: string | number | null | undefined) {
   if (typeof value === "number") {
     return value;
@@ -97,6 +104,40 @@ function buildTrackingCode(orderNumber: string) {
 
 function buildPaystackReference(orderNumber: string) {
   return `gg_${orderNumber.toLowerCase().replace(/[^a-z0-9]/g, "")}_${Date.now()}`;
+}
+
+async function reserveInventory(tx: DbTransaction, items: InventoryAdjustmentItem[]) {
+  for (const item of items) {
+    const updatedProducts = await tx
+      .update(productsTable)
+      .set({
+        stock: sql`${productsTable.stock} - ${String(item.quantity)}`,
+      })
+      .where(
+        and(
+          eq(productsTable.id, item.productId),
+          sql`${productsTable.stock} >= ${String(item.quantity)}`,
+        ),
+      )
+      .returning({
+        id: productsTable.id,
+      });
+
+    if (updatedProducts.length === 0) {
+      throw new Error(`${item.productName} does not have enough stock right now.`);
+    }
+  }
+}
+
+async function restoreInventory(tx: DbTransaction, items: InventoryAdjustmentItem[]) {
+  for (const item of items) {
+    await tx
+      .update(productsTable)
+      .set({
+        stock: sql`${productsTable.stock} + ${String(item.quantity)}`,
+      })
+      .where(eq(productsTable.id, item.productId));
+  }
 }
 
 function resolveCheckoutShade(shades: unknown[], requestedShadeName: string): DbShade | null {
@@ -241,6 +282,15 @@ export async function createCheckoutOrder(input: CheckoutInput): Promise<Checkou
         id: ordersTable.id,
       });
 
+    await reserveInventory(
+      tx,
+      normalizedItems.map((item) => ({
+        productId: item.productId,
+        productName: item.productName,
+        quantity: item.quantity,
+      })),
+    );
+
     await tx.insert(paymentsTable).values({
       orderId: order.id,
       provider: input.paymentMethod === "paystack" ? "paystack" : "cash_on_delivery",
@@ -324,9 +374,19 @@ export async function markPaystackPaymentFailed(
       .where(eq(paymentsTable.reference, reference))
       .limit(1);
 
-    if (!payment || payment.status === "paid") {
+    if (!payment || payment.status === "paid" || payment.status === "failed") {
       return;
     }
+
+    const orderItems = await tx
+      .select({
+        productId: orderItemsTable.productId,
+        quantity: orderItemsTable.quantity,
+        productName: productsTable.name,
+      })
+      .from(orderItemsTable)
+      .innerJoin(productsTable, eq(productsTable.id, orderItemsTable.productId))
+      .where(eq(orderItemsTable.orderId, payment.orderId));
 
     await tx
       .update(paymentsTable)
@@ -340,8 +400,18 @@ export async function markPaystackPaymentFailed(
       .update(ordersTable)
       .set({
         paymentStatus: "failed",
+        status: "cancelled",
       })
       .where(eq(ordersTable.id, payment.orderId));
+
+    await restoreInventory(
+      tx,
+      orderItems.map((item) => ({
+        productId: item.productId,
+        productName: item.productName,
+        quantity: parseNumber(item.quantity),
+      })),
+    );
   });
 }
 
@@ -384,6 +454,10 @@ export async function markPaystackPaymentPaid(
 
     if (!order) {
       throw new Error("Order for payment reference was not found.");
+    }
+
+    if (payment.status === "failed") {
+      throw new Error("Payment was already marked as failed and the reserved stock was released.");
     }
 
     if (payment.status !== "paid") {

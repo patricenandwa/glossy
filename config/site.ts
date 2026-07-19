@@ -3,9 +3,9 @@ export const SITE = {
   tagline: "Purely for lips.",
   description:
     "Luxury lip gloss handcrafted in Nairobi. Cushioned hydration, high-shine finish, same-day delivery across the city.",
-  whatsapp: "254700000000",
-  instagram: "https://instagram.com/glowandgo",
-  tiktok: "https://tiktok.com/@glowandgo",
+  whatsapp: "254718084567",
+  instagram: "https://instagram.com/_go_glossy",
+  tiktok: "https://tiktok.com/@_go_glossy",
   email: "hello@glowandgo.co.ke",
   location: "Kilimani, Nairobi",
   hours: "Mon – Sat, 9am – 7pm",

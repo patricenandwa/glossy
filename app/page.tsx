@@ -3,6 +3,8 @@ import { EmptyStateCard } from "@/components/product/EmptyStateCard";
 import { ProductCard } from "@/components/product/ProductCard";
 import { fetchFeaturedProducts, fetchBestSellers } from "@/lib/api";
 import { SITE } from "@/config/site";
+import { InstagramGallery } from "@/components/home";
+import { INSTAGRAM_POSTS } from "@/config/instagramPosts";
 import heroImage from "@/assets/hero-editorial.jpg";
 import tiktokStill from "@/assets/social-tiktok-1.jpg";
 import igStill from "@/assets/social-ig-1.jpg";
@@ -28,8 +30,6 @@ const WHY_US = [
   { icon: Leaf, title: "Clean ingredients", copy: "Vegan, cruelty-free, formulated with care." },
   { icon: ShieldCheck, title: "1,200+ happy lips", copy: "Loved by women across Nairobi." },
 ];
-
-const GALLERY = [g1, g2, g3, g4, tiktokStill, igStill];
 
 export default async function Page() {
   const featured = await fetchFeaturedProducts();
@@ -297,7 +297,7 @@ export default async function Page() {
           <div className="mb-8 flex items-end justify-between">
             <div>
               <p className="mb-2 text-xs font-medium uppercase tracking-widest text-zinc-500">
-                @glowandgo
+                Glow & Go Lip Care 💋
               </p>
               <h2 className="font-serif text-3xl text-charcoal sm:text-4xl">
                 From our Instagram
@@ -312,24 +312,7 @@ export default async function Page() {
               Follow
             </a>
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            {GALLERY.map((src, i) => (
-              <a
-                key={i}
-                href={SITE.instagram}
-                target="_blank"
-                rel="noreferrer"
-                className="block overflow-hidden rounded-2xl ring-1 ring-black/[0.04]"
-              >
-                <Image
-                  src={src}
-                  alt={`Glow & Go Instagram feed post ${i + 1}`}
-                  loading="lazy"
-                  className="aspect-square w-full object-cover transition-transform duration-500 hover:scale-[1.04]"
-                />
-              </a>
-            ))}
-          </div>
+          <InstagramGallery posts={INSTAGRAM_POSTS} profileUrl={SITE.instagram} />
         </div>
       </section>
     </>

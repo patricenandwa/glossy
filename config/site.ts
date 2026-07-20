@@ -6,8 +6,8 @@ export const SITE = {
   whatsapp: "254718084567",
   instagram: "https://instagram.com/_go_glossy",
   tiktok: "https://tiktok.com/@_go_glossy",
-  email: "hello@glowandgo.co.ke",
-  location: "Kilimani, Nairobi",
+  email: "barasasandrah@gmail.com",
+  location: "Nairobi",
   hours: "Mon – Sat, 9am – 7pm",
 };
 

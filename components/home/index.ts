@@ -1,0 +1,1 @@
+export { InstagramGallery } from "./InstagramGallery";

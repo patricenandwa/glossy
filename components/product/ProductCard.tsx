@@ -11,9 +11,6 @@ import Link from "next/link";
 import Image from "next/image";
 
 export function ProductCard({ product }: { product: APIProductResponse }) {
-  useEffect(() => {
-    console.log(product);
-  }, [product]);
   const [shade, setShade] = useState<DbShade | null>(product.shades[0] ?? null);
   const addItem = useCart((state) => state.addItem);
 
@@ -24,7 +21,6 @@ export function ProductCard({ product }: { product: APIProductResponse }) {
     typeof product.rating === "string" ? parseFloat(product.rating) : product.rating;
   const stock =
     typeof product.stock === "string" ? parseInt(product.stock, 10) : product.stock;
-  console.log(shade)
   const isOutOfStock = stock <= 0 || !shade;
   const hasShadeOptions = product.shades.length > 0;
 

@@ -1,4 +1,4 @@
-import founder from "@/assets/about-founder.jpg";
+import founder from "@/assets/about-founder.jpeg";
 import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";

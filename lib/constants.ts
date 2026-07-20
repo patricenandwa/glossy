@@ -1,5 +1,3 @@
-const promotedSiteUrl = process.env.NEXT_PUBLIC_PROMOTED_SITE_URL || "https://landing.coursefinder.co.ke/";
-
 
 // export const NAV_LINKS = [
 //   { to: "/", label: "Home" },

@@ -182,35 +182,55 @@ export async function createCheckoutOrder(input: CheckoutInput): Promise<Checkou
     .from(productsTable)
     .where(inArray(productsTable.slug, slugs));
 
-  if (products.length !== slugs.length) {
+  // Group all product rows by slug — each shade may be stored as a separate row
+  const rowsBySlug = new Map<string, typeof products>();
+  for (const product of products) {
+    const existing = rowsBySlug.get(product.slug);
+    if (existing) {
+      existing.push(product);
+    } else {
+      rowsBySlug.set(product.slug, [product]);
+    }
+  }
+
+  if (rowsBySlug.size !== slugs.length) {
     throw new Error("One or more products in your bag could not be found.");
   }
 
-  const productsBySlug = new Map(products.map((product) => [product.slug, product]));
-
   const normalizedItems = input.items.map((item) => {
-    const product = productsBySlug.get(item.productSlug);
-    if (!product) {
+    const rows = rowsBySlug.get(item.productSlug);
+    if (!rows || rows.length === 0) {
       throw new Error(`Product ${item.productSlug} was not found.`);
     }
 
-    const stock = parseNumber(product.stock);
-    if (item.quantity > stock) {
-      throw new Error(`${product.name} does not have enough stock right now.`);
+    // Find the specific row that owns the requested shade
+    let matchedRow: (typeof rows)[0] | null = null;
+    let resolvedShade: DbShade | null = null;
+
+    for (const row of rows) {
+      const shades = Array.isArray(row.shades) ? row.shades : [];
+      const shade = resolveCheckoutShade(shades, item.shadeName);
+      if (shade) {
+        matchedRow = row;
+        resolvedShade = shade;
+        break;
+      }
     }
 
-    const shades = Array.isArray(product.shades) ? product.shades : [];
-    const resolvedShade = resolveCheckoutShade(shades, item.shadeName);
+    if (!matchedRow || !resolvedShade) {
+      throw new Error(`${rows[0].name} shade ${item.shadeName} is no longer available.`);
+    }
 
-    if (!resolvedShade) {
-      throw new Error(`${product.name} shade ${item.shadeName} is no longer available.`);
+    const stock = parseNumber(matchedRow.stock);
+    if (item.quantity > stock) {
+      throw new Error(`${matchedRow.name} does not have enough stock right now.`);
     }
 
     return {
-      productId: product.id,
-      productName: product.name,
-      productSlug: product.slug,
-      price: parseNumber(product.price),
+      productId: matchedRow.id,
+      productName: matchedRow.name,
+      productSlug: matchedRow.slug,
+      price: parseNumber(matchedRow.price),
       quantity: item.quantity,
       shade: resolvedShade,
     };
